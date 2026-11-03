@@ -1,0 +1,8 @@
+# Archivos compilados de Java
+*.class
+
+# Metadatos de BlueJ (contexto de clases, timestamps)
+*.ctxt
+
+# Configuración/diagrama de BlueJ (posiciones, flechas - propio de cada máquina)
+package.bluej
