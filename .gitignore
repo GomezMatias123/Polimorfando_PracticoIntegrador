@@ -6,3 +6,17 @@
 
 # Configuración/diagrama de BlueJ (posiciones, flechas - propio de cada máquina)
 package.bluej
+
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Cursor / VS Code
+.vscode/
+.cursor/
+
+# Sistema
+.DS_Store
+Thumbs.db
