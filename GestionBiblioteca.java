@@ -1,5 +1,4 @@
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Scanner;
 
 /**
@@ -10,9 +9,6 @@ public class GestionBiblioteca {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Biblioteca biblio = new Biblioteca("Biblioteca Central UNNE");
-
-        // Carga inicial de datos de prueba para poder operar desde el inicio
-        precargarDatos(biblio);
 
         int opcion = 0;
         do {
@@ -39,9 +35,6 @@ public class GestionBiblioteca {
             } catch (NumberFormatException e) {
                 opcion = -1;
             }
-
-            System.out.println();
-
             switch (opcion) {
                 case 1:
                     System.out.print("Ingrese DNI del estudiante: ");
@@ -113,12 +106,7 @@ public class GestionBiblioteca {
                     if (libroDev == null) {
                         System.out.println(">> Error: El libro especificado no existe en la biblioteca.");
                     } else {
-                        try {
                             biblio.devolverLibro(libroDev);
-                            System.out.println(">> Libro devuelto con éxito.");
-                        } catch (LibroNoPrestadoException e) {
-                            System.out.println(">> " + e.getMessage());
-                        }
                     }
                     break;
 
@@ -142,12 +130,8 @@ public class GestionBiblioteca {
                     if (libroCons == null) {
                         System.out.println(">> Error: El libro no pertenece al catálogo.");
                     } else {
-                        try {
                             String tenedor = biblio.quienTieneElLibro(libroCons);
                             System.out.println(">> El libro '" + libroCons.getTitulo() + "' está en poder de: " + tenedor);
-                        } catch (LibroNoPrestadoException e) {
-                            System.out.println(">> " + e.getMessage());
-                        }
                     }
                     break;
 
@@ -175,3 +159,14 @@ public class GestionBiblioteca {
 
         scanner.close();
     }
+
+
+    public static Libro buscarLibroPorTitulo(Biblioteca biblio, String tituloDev){
+        for(Libro l : biblio.getLibros()){
+            if (l.getTitulo().trim().equalsIgnoreCase(tituloDev.trim())) {
+                return l;
+            }
+        }
+        return null;
+    }
+}

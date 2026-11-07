@@ -118,7 +118,7 @@ public class Biblioteca {
      */
     public String quienTieneElLibro(Libro p_libro) {
         if (p_libro.prestado()) {
-            return p_libro.ultimoPrestamo().getSocio().getNombre();
+            return p_libro.ultimoPrestamo().getSocio().toString();
         } else {
             return "El libro se encuentra en la biblioteca";
         }
@@ -228,45 +228,26 @@ public void nuevoSocioDocente(int p_dniSocio,String p_nombre, String p_area){
 
 public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro){
     Prestamo nuevoPrestamo = null;
-    Socio socioSolicitante = null;
-    Libro libroDPrestamo = null;
+    Socio socioSolicitante = p_socio;
+    Libro libroDPrestamo = p_libro;
 
-    for(Socio s : this.getSocios()){
-            if(s.getDNI() == p_socio.getDNI()){
-            socioSolicitante = s;
-            break;
-            } 
-        }
-        for(Libro l : this.getLibros()){
-            if(l.getTitulo().trim().equalsIgnoreCase(p_libro.getTitulo())){
-                libroDPrestamo = l;
-                break;
-            } 
-            }
-        if (socioSolicitante == null || libroDPrestamo == null) {
-            System.err.println("Ocurrio un error: asignado al socio o al libro solicitado");
-            return false;
-        }
-
-    if(socioSolicitante.puedePedir() == true && libroDPrestamo.prestado()  == false){
-        nuevoPrestamo = new Prestamo(p_fechaRetiro, p_socio, p_libro);
-        libroDPrestamo.agregarPrestamo(nuevoPrestamo);
-        socioSolicitante.agregarPrestamo(nuevoPrestamo);
-            return true;
-    } else {
+    if (socioSolicitante == null || libroDPrestamo == null) {
+        System.err.println("Ocurrio un error: asignado al socio o al libro solicitado");
         return false;
     }
+        if(socioSolicitante.puedePedir() == true && libroDPrestamo.prestado()  == false){
+            nuevoPrestamo = new Prestamo(p_fechaRetiro, socioSolicitante, libroDPrestamo);
+            libroDPrestamo.agregarPrestamo(nuevoPrestamo);
+            socioSolicitante.agregarPrestamo(nuevoPrestamo);
+                return true;
+        } else {
+        return false;
+        }
 }
 
     public void devolverLibro(Libro pLibro){
-    Libro libroDDevolucion = null;
-    for(Libro l : this.getLibros()){
-        if (l.getTitulo().trim().equalsIgnoreCase(pLibro.getTitulo())) {
-        libroDDevolucion = l;
-        break;
-        }
-    }
-
+    Libro libroDDevolucion = pLibro;
+    
     if (libroDDevolucion == null) 
         {
         System.err.println("Error en asignacion del libro");
@@ -285,7 +266,7 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
     public int cantidadDeSociosPorTipo(String p_objeto){
         int cant = 0;
         for(Socio s : this.getSocios()){
-            if (s.soyDeLaClase().trim().equalsIgnoreCase(p_objeto)) {
+            if (s.soyDeLaClase().trim().equalsIgnoreCase(p_objeto.trim())) {
                 cant += 1;
             }
         }
