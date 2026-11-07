@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.Calendar;
 
 /**
@@ -43,9 +44,15 @@ public class Docente extends Socio {
     /**
      * Suma dias de prestamo al docente, como premio a la responsabilidad.
      */
-    public void cambiarDiasDePrestamo(int p_dias) {
+    public void cambiarDiasDePrestamo(int p_dias)  {
         this.setDiasPrestamo(this.getDiasPrestamo() + p_dias);
     }
+
+    public void cambiarDiasDocente(Docente p_docente, int p_dias) throws SQLException {
+    int nuevoTotal = p_docente.getDiasPrestamo() + p_dias;
+    SocioDAO.actualizarDiasPrestamo(p_docente.getDNI(), nuevoTotal);   // guarda el total
+    p_docente.cambiarDiasDePrestamo(p_dias);
+}
 
     /**
      * El docente no tiene limite de libros, solo se controla

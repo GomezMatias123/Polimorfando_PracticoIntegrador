@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Calendar;
+import java.sql.SQLException;
 
 public class Biblioteca {
 
@@ -90,6 +91,13 @@ public class Biblioteca {
         return socios;
     }
 
+
+    public void cargarDesdeBD() throws SQLException {
+    ConexionDB.crearTablas();
+    this.getSocios().addAll(SocioDAO.cargarTodos());
+    this.getLibros().addAll(LibroDAO.cargarTodos());
+    PrestamoDAO.cargarTodos(this.getSocios(), this.getLibros());
+}
     /**
      * Devuelve una coleccion con los docentes responsables (aquellos que nunca
      * tuvieron ni tienen un prestamo vencido).
@@ -211,22 +219,25 @@ public class Biblioteca {
         return lista;
     }
 
-public void nuevoLibro(String p_titulo, int p_edicion, String p_editorial, int p_anio){
+public void nuevoLibro(String p_titulo, int p_edicion, String p_editorial, int p_anio) throws SQLException{
     Libro nuevoLibro = new Libro(p_titulo, p_edicion, p_editorial, p_anio);
+    LibroDAO.insertar(nuevoLibro);
     this.getLibros().add(nuevoLibro);
 }
 
-public void nuevoSocioEstudiante(int p_dniSocio, String p_nombre, String p_carrera){
+public void nuevoSocioEstudiante(int p_dniSocio, String p_nombre, String p_carrera) throws SQLException{
     Socio nuevoSocio = new Estudiante(p_dniSocio, p_nombre, p_carrera);
+    SocioDAO.insertar(nuevoSocio);
     this.getSocios().add(nuevoSocio);
 }
 
-public void nuevoSocioDocente(int p_dniSocio,String p_nombre, String p_area){
+public void nuevoSocioDocente(int p_dniSocio,String p_nombre, String p_area) throws SQLException{
     Socio nuevoSocio = new Docente(p_dniSocio, p_nombre, p_area);
+    SocioDAO.insertar(nuevoSocio);
     this.getSocios().add(nuevoSocio);
 }
 
-public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro){
+public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro) throws SQLException{
     Prestamo nuevoPrestamo = null;
     Socio socioSolicitante = p_socio;
     Libro libroDPrestamo = p_libro;
@@ -237,6 +248,7 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
     }
         if(socioSolicitante.puedePedir() == true && libroDPrestamo.prestado()  == false){
             nuevoPrestamo = new Prestamo(p_fechaRetiro, socioSolicitante, libroDPrestamo);
+            PrestamoDAO.insertar(nuevoPrestamo);  
             libroDPrestamo.agregarPrestamo(nuevoPrestamo);
             socioSolicitante.agregarPrestamo(nuevoPrestamo);
                 return true;
@@ -245,7 +257,7 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
         }
 }
 
-    public void devolverLibro(Libro pLibro){
+    public void devolverLibro(Libro pLibro) throws SQLException{
     Libro libroDDevolucion = pLibro;
     
     if (libroDDevolucion == null) 
@@ -260,6 +272,7 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
 
     Calendar fechaHoy = Calendar.getInstance();
     int cantPrestamos = libroDDevolucion.getPrestamos().size() - 1;
+    PrestamoDAO.registrarDevolucion(libroDDevolucion.getTitulo(), fechaHoy); 
     libroDDevolucion.getPrestamos().get(cantPrestamos).registrarFechaDevolucion(fechaHoy);
     }
 
