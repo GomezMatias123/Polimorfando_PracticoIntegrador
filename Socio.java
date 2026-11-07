@@ -37,7 +37,11 @@ public abstract class Socio {
 
     public int cantLibrosPrestados() {
 
-        return this.getPrestamos().size();
+    int cant = 0;
+    for (Prestamo p : this.getPrestamos()) {
+    if (p.getFechaDevolucion() == null) cant++;
+    }
+    return cant;
 
     }
 
