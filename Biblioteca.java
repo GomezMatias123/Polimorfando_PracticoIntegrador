@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Calendar;
 
 public class Biblioteca {
 
@@ -40,9 +41,9 @@ public class Biblioteca {
      * 
      * @param p_nombre
      */
-    private void setNombre(String p_nombre) {
-        this.nombre = p_nombre;
-    }
+  private void setNombre(String p_nombre){
+      this.nombre = p_nombre;
+  }
 
     /**
      * recibe un ArrayList de Libro y permite modificar el valor del atributo libro
@@ -208,5 +209,99 @@ public class Biblioteca {
             lista = lista + "* " + unDocente.toString() + "\n";
         }
         return lista;
+    }
+
+public void nuevoLibro(String p_titulo, int p_edicion, String p_editorial, int p_anio){
+    Libro nuevoLibro = new Libro(p_titulo, p_edicion, p_editorial, p_anio);
+    this.getLibros().add(nuevoLibro);
+}
+
+public void nuevoSocioEstudiante(int p_dniSocio, String p_nombre, String p_carrera){
+    Socio nuevoSocio = new Estudiante(p_dniSocio, p_nombre, p_carrera);
+    this.getSocios().add(nuevoSocio);
+}
+
+public void nuevoSocioDocente(int p_dniSocio,String p_nombre, String p_area){
+    Socio nuevoSocio = new Docente(p_dniSocio, p_nombre, p_area);
+    this.getSocios().add(nuevoSocio);
+}
+
+public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro){
+    Prestamo nuevoPrestamo = null;
+    Socio socioSolicitante = null;
+    Libro libroDPrestamo = null;
+
+    for(Socio s : this.getSocios()){
+            if(s.getDNI() == p_socio.getDNI()){
+            socioSolicitante = s;
+            break;
+            } 
+        }
+        for(Libro l : this.getLibros()){
+            if(l.getTitulo().trim().equalsIgnoreCase(p_libro.getTitulo())){
+                libroDPrestamo = l;
+                break;
+            } 
+            }
+        if (socioSolicitante == null || libroDPrestamo == null) {
+            System.err.println("Ocurrio un error: asignado al socio o al libro solicitado");
+            return false;
+        }
+
+    if(socioSolicitante.puedePedir() == true && libroDPrestamo.prestado()  == false){
+        nuevoPrestamo = new Prestamo(p_fechaRetiro, p_socio, p_libro);
+        libroDPrestamo.agregarPrestamo(nuevoPrestamo);
+        socioSolicitante.agregarPrestamo(nuevoPrestamo);
+            return true;
+    } else {
+        return false;
+    }
+}
+
+    public void devolverLibro(Libro pLibro){
+    Libro libroDDevolucion = null;
+    for(Libro l : this.getLibros()){
+        if (l.getTitulo().trim().equalsIgnoreCase(pLibro.getTitulo())) {
+        libroDDevolucion = l;
+        break;
+        }
+    }
+
+    if (libroDDevolucion == null) 
+        {
+        System.err.println("Error en asignacion del libro");
+        return;
+    }
+
+    if (!libroDDevolucion.prestado()) {
+    throw new LibroNoPrestadoException("El libro " + libroDDevolucion.toString() + " no se puede devolver ya que se encuentra en la biblioteca");
+    }
+
+    Calendar fechaHoy = Calendar.getInstance();
+    int cantPrestamos = libroDDevolucion.getPrestamos().size() - 1;
+    libroDDevolucion.getPrestamos().get(cantPrestamos).registrarFechaDevolucion(fechaHoy);
+    }
+
+    public int cantidadDeSociosPorTipo(String p_objeto){
+        int cant = 0;
+        for(Socio s : this.getSocios()){
+            if (s.soyDeLaClase().trim().equalsIgnoreCase(p_objeto)) {
+                cant += 1;
+            }
+        }
+        return cant;
+    }
+
+    public ArrayList <Prestamo> prestamosVencidos(){
+        ArrayList <Prestamo> auxListaPrestamos = new ArrayList<>();
+        Calendar fechaHoy = Calendar.getInstance();
+        for(Socio s : this.getSocios()){
+            for(Prestamo p : s.getPrestamos()){
+                if (p.vencido(fechaHoy) && p.getFechaDevolucion() == null) {
+                    auxListaPrestamos.add(p);
+                }
+            }
+        }
+        return auxListaPrestamos;
     }
 }

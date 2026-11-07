@@ -138,16 +138,16 @@ public class Libro {
      * Evalúa si el libro se encuentra actualmente prestado.
      * Recorre el historial buscando algún préstamo sin fecha de devolución asentada.
      * 
-     * @return true si el libro está prestado (posee un préstamo activo sin devolver), 
+     * @return true  si el libro está prestado (posee un préstamo activo sin devolver), 
      *         false si está disponible en la biblioteca.
      */
     public boolean prestado() {
         for (Prestamo p : this.getPrestamos()) {
             if (p.getFechaDevolucion() == null) {
-                return true; // Encontró un préstamo 
+                return true; // Encontró un préstamo sin devolucion, no se puede prestar el libro
             }
         }
-        return false; // Todos los préstamos fueron devueltos o la lista está vacía
+        return false; // Todos los prestamos han sido devueltos, el libro se encuentra disponible
     }
 
     /**
@@ -155,7 +155,7 @@ public class Libro {
      * 
      * @return Cadena con la estructura: "Titulo: ".
      */
-    @Override
+
     public String toString() {
         return "Titulo: " + this.getTitulo();
     }
