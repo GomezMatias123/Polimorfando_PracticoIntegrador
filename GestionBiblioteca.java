@@ -1,6 +1,6 @@
 import java.util.Calendar;
 import java.util.Scanner;
-
+import java.sql.SQLException;
 /**
  * Clase ejecutable gestión biblioteca mediante menú por consola.
  */
@@ -9,6 +9,12 @@ public class GestionBiblioteca {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Biblioteca biblio = new Biblioteca("Biblioteca Central UNNE");
+        try {
+        biblio.cargarDesdeBD();
+        } catch (SQLException e) {
+            System.out.println("No se pudo abrir la base de datos: " + e.getMessage());
+            return;
+        }
 
         int opcion = 0;
         do {
@@ -35,6 +41,7 @@ public class GestionBiblioteca {
             } catch (NumberFormatException e) {
                 opcion = -1;
             }
+        try{
             switch (opcion) {
                 case 1:
                     System.out.print("Ingrese DNI del estudiante: ");
@@ -154,6 +161,15 @@ public class GestionBiblioteca {
                     System.out.println("Opción no válida. Intente nuevamente.");
                     break;
             }
+        } catch (SQLException e) {
+    if (e.getMessage().contains("UNIQUE")) {
+        System.out.println(">> Error: ya existe un registro con ese DNI o título.");
+    } else {
+        System.out.println(">> Error de base de datos: " + e.getMessage());
+    }
+} catch (LibroNoPrestadoException e) {
+    System.out.println(">> Error: " + e.getMessage());
+}
 
         } while (opcion != 0);
 
