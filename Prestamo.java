@@ -21,7 +21,7 @@ public class Prestamo {
         this.setFechaRetiro(p_fechaRetiro);
         this.setSocio(p_socio);
         this.setLibro(p_libro);
-
+        this.setFechaDevolucion(null);
     }
 
     /**
@@ -48,11 +48,12 @@ public class Prestamo {
 
     public boolean vencido(Calendar p_fecha) {
 
-        Calendar fechaVencimiento = this.getFechaRetiro();
+        Calendar fechaVencimiento = (Calendar) this.getFechaRetiro().clone();
 
-        fechaVencimiento.add(fechaVencimiento.get(Calendar.DAY_OF_MONTH), this.getSocio().getDiasPrestamo());
+        fechaVencimiento.add(Calendar.DAY_OF_MONTH, this.getSocio().getDiasPrestamo());
 
 
+        
         return p_fecha.after(fechaVencimiento);
 
     }

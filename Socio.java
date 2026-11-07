@@ -50,7 +50,7 @@ public abstract class Socio {
     public String toString() {
 
         return "D.N.I: " + this.getDNI() + " || " + this.getNombre() +
-               " (" + this.soyDeLaClase() + ") || Libros Prestados: " + this.cantLibrosPrestados();
+                " (" + this.soyDeLaClase() + ") || Libros Prestados: " + this.cantLibrosPrestados();
 
     }
 
@@ -142,6 +142,16 @@ public abstract class Socio {
 
         return this.prestamos;
 
+    }
+
+
+    /**
+     * Adiciona un nuevo préstamo a la lista del Socio.
+     * 
+     * @param p_prestamo Objeto de tipo Prestamo a agregar.
+     */
+    public void agregarPrestamo(Prestamo p_prestamo) {
+        this.getPrestamos().add(p_prestamo);
     }
 
 }
