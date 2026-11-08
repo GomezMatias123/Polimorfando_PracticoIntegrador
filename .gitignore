@@ -23,3 +23,5 @@ Thumbs.db
 
 # Base de datos SQLite local
 *.db
+
+tempCodeRunnerFile.*
