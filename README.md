@@ -86,7 +86,7 @@ Se necesita **BlueJ 5 o superior** (probado con la versión 6.0).
    - **`GestionBiblioteca`** para el menú por consola (se usa en la ventana Terminal de BlueJ).
 
 ## Estructura del repositorio
-
+```text
 -polimorfando_practicointegrador/
     ├── img/
     │       └── facena-unne-1024x320.png     
@@ -108,7 +108,7 @@ Se necesita **BlueJ 5 o superior** (probado con la versión 6.0).
     ├── Socio.java
     ├── SocioDAO.java
     └── VentanaBiblioteca.java
-
+```
 ## Enlaces
 
 - **Repositorio:** https://github.com/GomezMatias123/Polimorfando_PracticoIntegrador
