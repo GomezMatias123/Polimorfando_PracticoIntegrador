@@ -123,5 +123,5 @@ Se necesita **BlueJ 5 o superior** (probado con la versión 6.0).
 | Baez Zimerman Victor Hugo | 45373286 | https://github.com/SebaAeg |
 | Gabaldo Zdanovicz Matias Nahuel | 46515453 | https://github.com/zeedthegreat |
 | Acosta Gonzalo David | 46144799 | https://github.com/gonzalodavidacosta |
-| Fernandez Fabio Javier | https://github.com/fernandezfabiojavier-dot | |
+| Fernandez Fabio Javier | 46382663 | https://github.com/fernandezfabiojavier-dot |
 | Gomez Matias Nicolas | 41949991 | https://github.com/GomezMatias123 |
