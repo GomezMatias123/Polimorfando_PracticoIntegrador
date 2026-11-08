@@ -119,7 +119,7 @@ Se necesita **BlueJ 5 o superior** (probado con la versión 6.0).
 | Integrante | D.N.I. | GitHub |
 |---|---|---|
 | Aegerter Sebastián Gabriel | 46786457 | https://github.com/SebaAeg |
-| Baez Zimerman Victor Hugo | 45373286 | https://github.com/SebaAeg |
+| Baez Zimerman Victor Hugo | 45373286 | https://github.com/VictorHBZ |
 | Gabaldo Zdanovicz Matias Nahuel | 46515453 | https://github.com/zeedthegreat |
 | Acosta Gonzalo David | 46144799 | https://github.com/gonzalodavidacosta |
 | Fernandez Fabio Javier | 46382663 | https://github.com/fernandezfabiojavier-dot |
