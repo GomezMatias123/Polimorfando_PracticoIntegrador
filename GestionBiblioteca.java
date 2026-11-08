@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class GestionBiblioteca {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        
         Biblioteca biblio = new Biblioteca("Biblioteca Central UNNE");
         try {
         biblio.cargarDesdeBD();
@@ -15,7 +15,7 @@ public class GestionBiblioteca {
             System.out.println("No se pudo abrir la base de datos: " + e.getMessage());
             return;
         }
-
+        Scanner scanner = new Scanner(System.in);
         int opcion = 0;
         do {
             System.out.println("\n==========================================");
@@ -185,4 +185,4 @@ public class GestionBiblioteca {
         }
         return null;
     }
-}
+} 
