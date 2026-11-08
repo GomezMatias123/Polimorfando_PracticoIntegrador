@@ -13,6 +13,12 @@ import java.util.ArrayList;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.util.List;
 
+    /**
+     * Ventana principal de la interfaz gráfica de la biblioteca. Muestra un menú inicial con el
+     * logo de la universidad y tres pantallas (Libros, Socios y Préstamos) entre las que se navega
+     * con botones: solo una está visible a la vez. Todos los datos se leen y se modifican a través d
+     * e la clase Biblioteca, que se encarga de guardarlos en la base de datos.
+     */
 public class VentanaBiblioteca extends JFrame {
 
     private final Biblioteca biblio;
@@ -43,9 +49,15 @@ public class VentanaBiblioteca extends JFrame {
         };
         private final JTable tablaPrestamos = new JTable(modeloPrestamos);
         private final ArrayList<Prestamo> filasPrestamos = new ArrayList<>();
-        private final CardLayout cartas = new CardLayout();      // el "administrador" de cartas
-        private final JPanel contenedor = new JPanel(cartas);    // la baraja: usa ese layout
+        private final CardLayout cartas = new CardLayout();     
+        private final JPanel contenedor = new JPanel(cartas);    
 
+    /**
+     * Crea la ventana: arma el menú y las tres pantallas, muestra el menú al abrir
+     * y carga en las tablas los datos que ya tiene la biblioteca.
+     * 
+     * @param biblio Biblioteca con la que trabaja la interfaz (con sus datos ya cargados).
+     */
     public VentanaBiblioteca(Biblioteca biblio) {
         super(biblio.getNombre());
         this.biblio = biblio;
@@ -65,12 +77,19 @@ public class VentanaBiblioteca extends JFrame {
         refrescarPrestamos(); 
     }
 
+    /**
+     * Arma la pantalla de Libros: una barra de búsqueda por título arriba, la tabla de libros
+     * en el centro y los botones Agregar libro, Prestar, Devolver y ¿Quién lo tiene? abajo.
+     * 
+     * @return Panel con la pantalla de Libros.
+     */
+
     private JPanel panelLibros() {
     JPanel panel = new JPanel(new BorderLayout(8, 12));
-    panel.setBackground(AZUL);                                              // fondo azul del logo
+    panel.setBackground(AZUL);                                              
     panel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
-    // --- Arriba: búsqueda
+
     JLabel lblBuscar = new JLabel("Buscar por título:");
     lblBuscar.setFont(FUENTE_NEGRITA);
     lblBuscar.setForeground(Color.WHITE);
@@ -80,16 +99,16 @@ public class VentanaBiblioteca extends JFrame {
         BorderFactory.createEmptyBorder(4, 8, 4, 8)));
 
     JPanel busqueda = new JPanel(new BorderLayout(8, 0));
-    busqueda.setOpaque(false);                                              // deja ver el fondo azul
+    busqueda.setOpaque(false);                                              
     busqueda.add(lblBuscar, BorderLayout.WEST);
     busqueda.add(txtBuscarLibro, BorderLayout.CENTER);
     panel.add(busqueda, BorderLayout.NORTH);
 
-    // --- Centro: tabla con filtro
+
     TableRowSorter<DefaultTableModel> filtro = new TableRowSorter<>(modeloLibros);
     tablaLibros.setRowSorter(filtro);
     tablaLibros.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    estilizarTabla(tablaLibros);                                            // nueva
+    estilizarTabla(tablaLibros);                                            
     txtBuscarLibro.getDocument().addDocumentListener(new DocumentListener() {
         public void insertUpdate(DocumentEvent e)  { aplicarFiltroLibros(filtro); }
         public void removeUpdate(DocumentEvent e)  { aplicarFiltroLibros(filtro); }
@@ -97,11 +116,11 @@ public class VentanaBiblioteca extends JFrame {
     });
 
     JScrollPane scroll = new JScrollPane(tablaLibros);
-    scroll.setBorder(BorderFactory.createLineBorder(DORADO, 2));            // marco dorado
+    scroll.setBorder(BorderFactory.createLineBorder(DORADO, 2));            
     scroll.getViewport().setBackground(Color.WHITE);
     panel.add(scroll, BorderLayout.CENTER);
 
-    // --- Abajo: botones
+    
     JButton btnAgregar = new JButton("Agregar libro");
     btnAgregar.addActionListener(e -> agregarLibro());
     JButton btnPrestar = new JButton("Prestar");
@@ -114,23 +133,34 @@ public class VentanaBiblioteca extends JFrame {
     JPanel botones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
     botones.setOpaque(false);
     for (JButton b : new JButton[]{btnAgregar, btnPrestar, btnDevolver, btnQuien}) {
-        estilizarBoton(b);                                                  // mismo estilo para los cuatro
+        estilizarBoton(b);                                                 
         botones.add(b);
     }
     panel.add(botones, BorderLayout.SOUTH);
     return panel;
 }
 
+    /**
+     * Filtra la tabla de libros según el texto de la barra de búsqueda: deja visibles los libros
+     * cuyo título contiene el texto, sin distinguir mayúsculas de minúsculas.
+     * Si la barra está vacía, muestra todos los libros.
+     * 
+     * @param filtro Ordenador de la tabla de libros sobre el que se aplica el filtro.
+     */
 private void aplicarFiltroLibros(TableRowSorter<DefaultTableModel> filtro) {
     String texto = txtBuscarLibro.getText().trim();
     if (texto.isEmpty()) {
-        filtro.setRowFilter(null);   // sin texto: se muestran todos
+        filtro.setRowFilter(null);   
     } else {
-        // (?iu) ignora mayúsculas y tildes de mayúsculas; quote evita que símbolos como . o ( se interpreten como regex; 0 = columna Título
+        
         filtro.setRowFilter(RowFilter.regexFilter("(?iu)" + Pattern.quote(texto), 0));
     }
 }
 
+    /**
+     * Vuelve a cargar la tabla de libros con los datos actuales de la biblioteca, indicando si
+     * cada uno está prestado, y actualiza los desplegables de la pantalla de Préstamos.
+     */
     private void refrescarLibros() {
         modeloLibros.setRowCount(0);
         for (Libro l : biblio.getLibros()) {
@@ -142,6 +172,11 @@ private void aplicarFiltroLibros(TableRowSorter<DefaultTableModel> filtro) {
         refrescarCombos();
     }
 
+    /**
+     * Pide los datos de un libro nuevo en un formulario y lo registra en la biblioteca.
+     * Valida que el título no esté vacío y que la edición y el año sean números.
+     * Si ya existe un libro con ese título o falla la base de datos, informa el error en pantalla.
+     */
     private void agregarLibro() {
         JTextField titulo = new JTextField();
         JTextField edicion = new JTextField();
@@ -176,6 +211,13 @@ private void aplicarFiltroLibros(TableRowSorter<DefaultTableModel> filtro) {
         }
     }
 
+    /**
+     * Arma la pantalla de Socios: la barra de búsqueda y el filtro por tipo arriba, la tabla de
+     * socios en el centro y abajo los botones para agregar estudiantes y docentes, ampliar los
+     * días de préstamo de un docente y el conteo de socios por tipo.
+     * 
+     * @return Panel con la pantalla de Socios.
+     */
     private JPanel panelSocios() {
     JPanel panel = new JPanel(new BorderLayout(8, 12));
     panel.setBackground(AZUL);
@@ -191,15 +233,17 @@ private void aplicarFiltroLibros(TableRowSorter<DefaultTableModel> filtro) {
     scroll.getViewport().setBackground(Color.WHITE);
     panel.add(scroll, BorderLayout.CENTER);
 
-    // --- Abajo: botones a la izquierda, conteo a la derecha
+    
     JButton btnEst = new JButton("Agregar estudiante");
     btnEst.addActionListener(e -> agregarSocio(true));
     JButton btnDoc = new JButton("Agregar docente");
     btnDoc.addActionListener(e -> agregarSocio(false));
+    JButton btnDias = new JButton("Ampliar días de préstamo");
+    btnDias.addActionListener(e -> ampliarDiasDocente());
 
     JPanel botones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
     botones.setOpaque(false);
-    for (JButton b : new JButton[]{btnEst, btnDoc}) {
+    for (JButton b : new JButton[]{btnEst, btnDoc, btnDias}) {
         estilizarBoton(b);
         botones.add(b);
     }
@@ -210,11 +254,16 @@ private void aplicarFiltroLibros(TableRowSorter<DefaultTableModel> filtro) {
     JPanel abajo = new JPanel(new BorderLayout());
     abajo.setOpaque(false);
     abajo.add(botones, BorderLayout.WEST);
-    abajo.add(lblConteoSocios, BorderLayout.EAST);     // esquina inferior derecha
+    abajo.add(lblConteoSocios, BorderLayout.EAST);     
     panel.add(abajo, BorderLayout.SOUTH);
     return panel;
 }
 
+    /**
+     * Vuelve a cargar la tabla de socios con los datos actuales de la biblioteca (con la carrera
+     * o el área según el tipo), actualiza el conteo de estudiantes y docentes y los desplegables
+     * de la pantalla de Préstamos.
+     */
 private void refrescarSocios() {
     modeloSocios.setRowCount(0);
     for (Socio s : biblio.getSocios()) {
@@ -230,6 +279,14 @@ private void refrescarSocios() {
     refrescarCombos();
 }
 
+    /**
+     * Pide los datos de un socio nuevo en un formulario y lo registra en la biblioteca.
+     * Valida que el nombre y la carrera o el área no estén vacíos y que el D.N.I. sea un número.
+     * Si ya existe un socio con ese D.N.I. o falla la base de datos, informa el error en pantalla.
+     * 
+     * @param esEstudiante true para registrar un estudiante (pide la carrera); false para
+     *        registrar un docente (pide el área o departamento).
+     */
 private void agregarSocio(boolean esEstudiante) {
     JTextField dni = new JTextField();
     JTextField nombre = new JTextField();
@@ -266,6 +323,10 @@ private void agregarSocio(boolean esEstudiante) {
     }
 }
 
+    /**
+     * Actualiza los desplegables de socios y libros de la pantalla de Préstamos con los datos
+     * actuales de la biblioteca, conservando lo que estaba seleccionado si todavía existe.
+     */
 private void refrescarCombos() {
     Object selSocio = cmbSocios.getSelectedItem();
     Object selLibro = cmbLibros.getSelectedItem();
@@ -277,12 +338,19 @@ private void refrescarCombos() {
     if (selLibro != null) cmbLibros.setSelectedItem(selLibro);
 }
 
+    /**
+     * Arma la pantalla de Préstamos: los desplegables de socio y libro arriba, la tabla de
+     * préstamos en el centro (con los pendientes y vencidos primero) y abajo los botones
+     * Prestar, Devolver y ¿Quién tiene el libro?.
+     * 
+     * @return Panel con la pantalla de Préstamos.
+     */
 private JPanel panelPrestamos() {
     JPanel panel = new JPanel(new BorderLayout(8, 12));
     panel.setBackground(AZUL);
     panel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
-    // --- Arriba: los dos desplegables, cada uno con su etiqueta
+
     JLabel lblSocio = new JLabel("Socio:");
     JLabel lblLibro = new JLabel("Libro:");
     for (JLabel l : new JLabel[]{lblSocio, lblLibro}) {
@@ -302,24 +370,24 @@ private JPanel panelPrestamos() {
     arriba.add(cmbLibros);
     panel.add(arriba, BorderLayout.NORTH);
 
-    // --- Centro: tabla de préstamos
+
     tablaPrestamos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     estilizarTabla(tablaPrestamos);
-    // (paso 2: renderer y orden)
+
     tablaPrestamos.setDefaultRenderer(Object.class, new RenderPrestamos());
 
 TableRowSorter<DefaultTableModel> orden = new TableRowSorter<>(modeloPrestamos);
 tablaPrestamos.setRowSorter(orden);
 orden.setSortKeys(List.of(
-    new RowSorter.SortKey(3, SortOrder.ASCENDING),    // 1º: Devolución, los pendientes arriba
-    new RowSorter.SortKey(4, SortOrder.DESCENDING))); // 2º: dentro de los pendientes, vencidos primero
+    new RowSorter.SortKey(3, SortOrder.ASCENDING),    
+    new RowSorter.SortKey(4, SortOrder.DESCENDING))); 
 
     JScrollPane scroll = new JScrollPane(tablaPrestamos);
     scroll.setBorder(BorderFactory.createLineBorder(DORADO, 2));
     scroll.getViewport().setBackground(Color.WHITE);
     panel.add(scroll, BorderLayout.CENTER);
 
-    // --- Abajo: botones a la izquierda, pista a la derecha
+
     JButton btnPrestar = new JButton("Prestar");
     btnPrestar.addActionListener(e -> prestar());
     JButton btnDevolver = new JButton("Devolver");
@@ -346,6 +414,11 @@ orden.setSortKeys(List.of(
     return panel;
 }
 
+    /**
+     * Vuelve a cargar la tabla de préstamos con el historial de todos los libros, indicando si
+     * cada préstamo está vencido. Guarda cada préstamo en una lista paralela a las filas para poder
+     * identificar el de la fila seleccionada, y actualiza también la tabla de libros.
+     */
 private void refrescarPrestamos() {
     Calendar hoy = Calendar.getInstance();
     modeloPrestamos.setRowCount(0);
@@ -357,16 +430,20 @@ private void refrescarPrestamos() {
             modeloPrestamos.addRow(new Object[]{
                 l.getTitulo(),
                 p.getSocio().getNombre(),
-                p.getFechaRetiro(),          // Calendar: se ordena como fecha
-                dev,                         // null = todavía no se devolvió
+                p.getFechaRetiro(),          
+                dev,                         
                 vencido ? "Sí" : "No"
             });
-            filasPrestamos.add(p);           // la fila i del modelo es el préstamo i de esta lista
+            filasPrestamos.add(p);           
         }
     }
     refrescarLibros();
 }
 
+    /**
+     * Presta el libro elegido en el desplegable de libros al socio elegido en el desplegable
+     * de socios. Si falta elegir alguno de los dos, avisa en pantalla.
+     */
 private void prestar() {
     Socio s = (Socio) cmbSocios.getSelectedItem();
     Libro l = (Libro) cmbLibros.getSelectedItem();
@@ -378,6 +455,10 @@ private void prestar() {
     realizarPrestamo(s, l);
 }
 
+    /**
+     * Registra la devolución del préstamo seleccionado en la tabla de préstamos, previa confirmación.
+     * Avisa si no hay ninguna fila seleccionada o si el préstamo ya fue devuelto.
+     */
 private void devolver() {
     int fila = tablaPrestamos.getSelectedRow();
     if (fila < 0) {
@@ -385,7 +466,7 @@ private void devolver() {
                 "Dato inválido", JOptionPane.WARNING_MESSAGE);
         return;
     }
-    // la fila visible puede estar ordenada: se convierte a la fila real del modelo
+
     Prestamo p = filasPrestamos.get(tablaPrestamos.convertRowIndexToModel(fila));
 
     if (p.getFechaDevolucion() != null) {
@@ -400,20 +481,33 @@ private void devolver() {
     if (ok == JOptionPane.YES_OPTION) realizarDevolucion(p.getLibro());
 }
 
+    /**
+     * Muestra quién tiene el libro elegido en el desplegable de libros.
+     */
 private void quienTiene() {
     Libro l = (Libro) cmbLibros.getSelectedItem();
     if (l == null) return;
     mostrarQuienTiene(l);
 }
 
-// Cambia la carta visible
+
+    /**
+     * Muestra una de las pantallas de la ventana (el menú, Libros, Socios o Préstamos).
+     * 
+     * @param nombre Nombre de la pantalla: "menu", "libros", "socios" o "prestamos".
+     */
 private void irA(String nombre) {
     cartas.show(contenedor, nombre);
 }
 
-// Pantalla del menú: tres botones centrados
+    /**
+     * Arma el menú principal: un encabezado con el logo y el nombre de la biblioteca y, debajo,
+     * los botones para ir a las pantallas de Libros, Socios y Préstamos.
+     * 
+     * @return Panel con el menú principal.
+     */
 private JPanel panelMenu() {
-    // --- Encabezado: logo arriba y título abajo, apilados
+    
     JPanel encabezado = new JPanel();
     encabezado.setLayout(new BoxLayout(encabezado, BoxLayout.Y_AXIS));
     encabezado.setBorder(BorderFactory.createCompoundBorder(
@@ -426,63 +520,90 @@ private JPanel panelMenu() {
 
     JLabel titulo = new JLabel(biblio.getNombre());
     titulo.setFont(new Font("Segoe UI", Font.BOLD, 28));
-    titulo.setForeground(ROJO);                        // movida: ahora titulo ya existe
+    titulo.setForeground(ROJO);                        
     titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
     encabezado.add(logo);
     encabezado.add(Box.createVerticalStrut(15));
     encabezado.add(titulo);
 
-    // --- Botones
+    
     JPanel botones = new JPanel(new GridLayout(3, 1, 0, 12));
-    botones.setOpaque(false);                          // movida: ahora botones ya existe
+    botones.setOpaque(false);                         
     botones.add(botonMenu("Libros", "libros"));
     botones.add(botonMenu("Socios", "socios"));
     botones.add(botonMenu("Préstamos", "prestamos"));
 
     JPanel centro = new JPanel(new GridBagLayout());
-    centro.setBackground(AZUL);                        // movida: ahora centro ya existe
+    centro.setBackground(AZUL);                       
     centro.add(botones);
 
-    // --- Armado: encabezado arriba, botones ocupando el resto
+    
     JPanel panel = new JPanel(new BorderLayout());
     panel.add(encabezado, BorderLayout.NORTH);
     panel.add(centro, BorderLayout.CENTER);
     return panel;
 }
 
-// Crea un botón que, al hacer clic, muestra la carta indicada
+    /**
+     * Crea un botón del menú principal que, al hacer clic, muestra la pantalla indicada.
+     * 
+     * @param texto Texto que se ve en el botón.
+     * @param destino Nombre de la pantalla a la que lleva el botón.
+     * @return Botón con el estilo del menú.
+     */
 private JButton botonMenu(String texto, String destino) {
     JButton b = new JButton(texto);
-    b.setPreferredSize(new Dimension(280, 48));   // ancho y alto del botón
+    b.setPreferredSize(new Dimension(280, 48));   
     b.addActionListener(e -> irA(destino));
     b.setBackground(ROJO);
     b.setForeground(DORADO);
     b.setFont(new Font("Segoe UI", Font.BOLD, 16));
-    b.setFocusPainted(false);                          // saca el recuadro punteado al hacer clic
+    b.setFocusPainted(false);                          
     b.setBorder(BorderFactory.createLineBorder(DORADO, 2));
     return b;
 }
 
 
-
+/** Ruta del logo del menú, relativa a la carpeta desde la que se ejecuta el programa. */
 private static final String RUTA_LOGO = "img/facena-unne-1024x320.png";
+/** Rojo oscuro del logo: botones, títulos y encabezados de tablas. */
 private static final Color ROJO   = new Color(0x7B1C1F);
+/** Dorado del logo: bordes y letras de los botones. */
 private static final Color DORADO = new Color(0xFFE600);
+/** Azul grisáceo del logo: fondo de las pantallas. */
 private static final Color AZUL   = new Color(0x45546A);
+/** Fuente normal de la interfaz. */
 private static final Font FUENTE         = new Font("Segoe UI", Font.PLAIN, 14);
+/** Fuente en negrita de la interfaz. */
 private static final Font FUENTE_NEGRITA = new Font("Segoe UI", Font.BOLD, 14);
 
+    /**
+     * Crea una etiqueta con el logo de la universidad, escalado al ancho indicado y manteniendo
+     * su proporción. Si no se encuentra el archivo de la imagen, devuelve una etiqueta con el
+     * texto "UNNE" en su lugar.
+     * 
+     * @param ancho Ancho en píxeles con el que se muestra el logo.
+     * @return Etiqueta con el logo, o con el texto "UNNE" si no se pudo cargar la imagen.
+     */
 private JLabel etiquetaLogo(int ancho) {
     ImageIcon original = new ImageIcon(RUTA_LOGO);
-    if (original.getIconWidth() <= 0) {          // no encontró el archivo
-        return new JLabel("UNNE");               // muestra texto y no se rompe
+    if (original.getIconWidth() <= 0) {          
+        return new JLabel("UNNE");               
     }
-    // alto = -1: se calcula solo, manteniendo la proporción del logo
+    
     Image escalada = original.getImage().getScaledInstance(ancho, -1, Image.SCALE_SMOOTH);
     return new JLabel(new ImageIcon(escalada));
 }
 
+    /**
+     * Realiza el préstamo de un libro a un socio con la fecha actual e informa el resultado en
+     * pantalla. Si no se puede prestar (libro ya prestado, o socio con préstamos vencidos o que
+     * superó su límite) o falla la base de datos, muestra el motivo. Luego actualiza las tablas.
+     * 
+     * @param s Socio que retira el libro.
+     * @param l Libro que se presta.
+     */
 private void realizarPrestamo(Socio s, Libro l) {
     try {
         if (biblio.prestarLibro(Calendar.getInstance(), s, l)) {
@@ -500,6 +621,13 @@ private void realizarPrestamo(Socio s, Libro l) {
     }
 }
 
+    /**
+     * Registra la devolución de un libro con la fecha actual e informa el resultado en pantalla.
+     * Si el libro no estaba prestado o falla la base de datos, muestra el error.
+     * Luego actualiza las tablas.
+     * 
+     * @param l Libro que se devuelve.
+     */
 private void realizarDevolucion(Libro l) {
     try {
         biblio.devolverLibro(l);
@@ -514,10 +642,23 @@ private void realizarDevolucion(Libro l) {
     }
 }
 
+    /**
+     * Muestra en un cuadro de diálogo el socio que tiene el libro, o un aviso si el libro
+     * se encuentra en la biblioteca.
+     * 
+     * @param l Libro que se consulta.
+     */
 private void mostrarQuienTiene(Libro l) {
     JOptionPane.showMessageDialog(this, biblio.quienTieneElLibro(l));
 }
-// Devuelve el libro de la fila seleccionada, o null si no hay ninguna
+
+    /**
+     * Obtiene el libro de la fila seleccionada en la tabla de libros, teniendo en cuenta que
+     * la tabla puede estar filtrada u ordenada. Si no hay ninguna fila seleccionada, avisa en pantalla.
+     * 
+     * @return El libro seleccionado, o null si no hay ninguna fila seleccionada.
+     */
+
 private Libro libroSeleccionado() {
     int fila = tablaLibros.getSelectedRow();
     if (fila < 0) {
@@ -525,10 +666,16 @@ private Libro libroSeleccionado() {
                 "Dato inválido", JOptionPane.WARNING_MESSAGE);
         return null;
     }
-    // si la tabla está filtrada u ordenada, la fila visible no coincide con la del modelo
+    
     int filaModelo = tablaLibros.convertRowIndexToModel(fila);
     return biblio.getLibros().get(filaModelo);
-}
+}   
+
+    /**
+     * Presta el libro seleccionado en la tabla de libros: pide el D.N.I. del socio, muestra su
+     * nombre y tipo para confirmar y realiza el préstamo. Avisa si no hay un libro seleccionado,
+     * si el D.N.I. no es un número o si no existe un socio con ese D.N.I.
+     */
 
 private void prestarDesdeLibros() {
     Libro l = libroSeleccionado();
@@ -537,7 +684,7 @@ private void prestarDesdeLibros() {
     String texto = JOptionPane.showInputDialog(this,
             "DNI del socio que retira \"" + l.getTitulo() + "\":",
             "Prestar libro", JOptionPane.QUESTION_MESSAGE);
-    if (texto == null) return;                         // tocó Cancelar
+    if (texto == null) return;                         
 
     try {
         Socio s = biblio.buscarSocio(Integer.parseInt(texto.trim()));
@@ -557,44 +704,72 @@ private void prestarDesdeLibros() {
     }
 }
 
+    /**
+     * Registra la devolución del libro seleccionado en la tabla de libros.
+     */
+
 private void devolverDesdeLibros() {
     Libro l = libroSeleccionado();
     if (l != null) realizarDevolucion(l);
 }
+
+    /**
+     * Muestra quién tiene el libro seleccionado en la tabla de libros.
+     */
 
 private void quienTieneDesdeLibros() {
     Libro l = libroSeleccionado();
     if (l != null) mostrarQuienTiene(l);
 }
 
-// Aplica a un botón el mismo estilo del menú: fondo rojo, letras doradas, borde dorado
+    /**
+     * Aplica a un botón el estilo de la interfaz: fondo rojo, letras y borde dorados
+     * y cursor de mano.
+     * 
+     * @param b Botón al que se le aplica el estilo.
+     */
 private void estilizarBoton(JButton b) {
     b.setBackground(ROJO);
     b.setForeground(DORADO);
     b.setFont(FUENTE_NEGRITA);
     b.setFocusPainted(false);
-    b.setCursor(new Cursor(Cursor.HAND_CURSOR));    // la manito al pasar el mouse
+    b.setCursor(new Cursor(Cursor.HAND_CURSOR));    
     b.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(DORADO, 2),             // borde dorado
-        BorderFactory.createEmptyBorder(6, 14, 6, 14)));       // aire adentro del botón
+        BorderFactory.createLineBorder(DORADO, 2),             
+        BorderFactory.createEmptyBorder(6, 14, 6, 14)));       
 }
+
+    /**
+     * Aplica a una tabla el estilo de la interfaz: filas más altas, líneas horizontales delgadas,
+     * fila seleccionada en azul y encabezado de columnas rojo con letras doradas.
+     * 
+     * @param t Tabla a la que se le aplica el estilo.
+     */
 private void estilizarTabla(JTable t) {
     t.setFont(FUENTE);
-    t.setRowHeight(28);                                   // filas más altas
-    t.setFillsViewportHeight(true);                       // el espacio vacío debajo se pinta blanco
-    t.setGridColor(new Color(0xD9DDE3));                  // líneas suaves
-    t.setShowVerticalLines(false);                        // solo líneas horizontales
-    t.setSelectionBackground(AZUL);                       // fila elegida: azul del logo, texto blanco
+    t.setRowHeight(28);                                   
+    t.setFillsViewportHeight(true);                       
+    t.setGridColor(new Color(0xD9DDE3));                  
+    t.setShowVerticalLines(false);                        
+    t.setSelectionBackground(AZUL);                       
     t.setSelectionForeground(Color.WHITE);
 
-    JTableHeader h = t.getTableHeader();                  // la fila de títulos de las columnas
+    JTableHeader h = t.getTableHeader();                 
     h.setBackground(ROJO);
     h.setForeground(DORADO);
     h.setFont(FUENTE_NEGRITA);
-    h.setReorderingAllowed(false);                        // no se pueden arrastrar las columnas
+    h.setReorderingAllowed(false);                       
 }
 
-// Igual que conBarraVolver, pero con el encabezado del menú: fondo blanco, título rojo y línea dorada
+
+    /**
+     * Envuelve el contenido de una pantalla con un encabezado que tiene el botón "Volver al menú"
+     * y el título de la pantalla, sobre fondo blanco y con una línea dorada debajo.
+     * 
+     * @param titulo Título que se muestra en el encabezado.
+     * @param contenido Panel con el contenido de la pantalla.
+     * @return Panel con el encabezado arriba y el contenido debajo.
+     */
 private JPanel conEncabezado(String titulo, JPanel contenido) {
     JButton volver = new JButton("← Volver al menú");
     estilizarBoton(volver);
@@ -603,12 +778,12 @@ private JPanel conEncabezado(String titulo, JPanel contenido) {
     JLabel lblTitulo = new JLabel(titulo);
     lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
     lblTitulo.setForeground(ROJO);
-    lblTitulo.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));   // separa el título del botón
+    lblTitulo.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));   
 
     JPanel encabezado = new JPanel(new BorderLayout());
     encabezado.setBackground(Color.WHITE);
     encabezado.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createMatteBorder(0, 0, 4, 0, DORADO),   // línea dorada abajo
+        BorderFactory.createMatteBorder(0, 0, 4, 0, DORADO),   
         BorderFactory.createEmptyBorder(10, 16, 10, 16)));
     encabezado.add(volver, BorderLayout.WEST);
     encabezado.add(lblTitulo, BorderLayout.CENTER);
@@ -619,6 +794,12 @@ private JPanel conEncabezado(String titulo, JPanel contenido) {
     return envoltorio;
 }
 
+    /**
+     * Arma la barra superior de la pantalla de Socios: una caja de búsqueda por D.N.I. o nombre
+     * y un desplegable para filtrar por tipo. Los dos aplican el filtro a la tabla apenas cambian.
+     * 
+     * @return Panel con la barra de búsqueda y el filtro por tipo.
+     */
 private JPanel panelBusquedaSocios() {
     JLabel lblBuscar = new JLabel("Buscar por DNI o nombre:");
     lblBuscar.setFont(FUENTE_NEGRITA);
@@ -653,11 +834,17 @@ private JPanel panelBusquedaSocios() {
     return busqueda;
 }
 
-// Combina los dos filtros: texto (DNI o nombre) y tipo
+    /**
+     * Filtra la tabla de socios combinando el texto de búsqueda y el tipo elegido. Cada palabra
+     * del texto debe aparecer en el D.N.I. o en el nombre (sin distinguir mayúsculas de minúsculas)
+     * y, si el tipo no es "Todos", el socio debe ser de ese tipo.
+     * Sin filtros, se muestran todos los socios.
+     */
+
 private void aplicarFiltroSocios() {
     ArrayList<RowFilter<DefaultTableModel, Integer>> filtros = new ArrayList<>();
 
-    // cada palabra escrita debe aparecer en la columna 0 (DNI) o 1 (Nombre)
+    
     String texto = txtBuscarSocio.getText().trim();
     if (!texto.isEmpty()) {
         for (String palabra : texto.split("\\s+")) {
@@ -665,19 +852,34 @@ private void aplicarFiltroSocios() {
         }
     }
 
-    // si el desplegable no está en "Todos", la columna 2 (Tipo) tiene que coincidir exacta
+    
     String tipo = (String) cmbTipoSocio.getSelectedItem();
     if (!tipo.equals("Todos")) {
         filtros.add(RowFilter.regexFilter("^" + tipo + "$", 2));
     }
 
     if (filtros.isEmpty()) {
-        filtroSocios.setRowFilter(null);                      // sin filtros: se ven todos
+        filtroSocios.setRowFilter(null);                     
     } else {
-        filtroSocios.setRowFilter(RowFilter.andFilter(filtros)); // tienen que cumplirse todos
+        filtroSocios.setRowFilter(RowFilter.andFilter(filtros)); 
     }
 }
+
+    /**
+     * Dibuja los elementos de los desplegables con un texto corto: nombre, D.N.I. y tipo
+     * para los socios, y título y edición para los libros.
+     */
 private class RenderCombo extends DefaultListCellRenderer {
+        /**
+         * Devuelve el componente que dibuja un elemento de la lista desplegable.
+         * 
+         * @param lista Lista que se está dibujando.
+         * @param valor Elemento a dibujar (un Socio o un Libro).
+         * @param indice Posición del elemento en la lista.
+         * @param seleccionado true si el elemento está seleccionado.
+         * @param foco true si el elemento tiene el foco.
+         * @return Componente con el texto del elemento.
+         */
     @Override
     public Component getListCellRendererComponent(JList<?> lista, Object valor,
             int indice, boolean seleccionado, boolean foco) {
@@ -689,23 +891,44 @@ private class RenderCombo extends DefaultListCellRenderer {
         }
         return this;
     }
-}
+}   
+    /**
+     * Dibuja las celdas de la tabla de préstamos: muestra las fechas con formato (y un guion si
+     * todavía no hay fecha de devolución) y pinta las filas vencidas: en rojo claro si siguen sin
+     * devolverse y en amarillo claro si se devolvieron fuera de término.
+     */
 private class RenderPrestamos extends DefaultTableCellRenderer {
     private final SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-    // convierte el valor de la celda en texto
+        /**
+         * Convierte el valor de una celda en el texto que se muestra: las fechas con formato
+         * dd/MM/yyyy HH:mm y un guion cuando no hay valor.
+         * 
+         * @param valor Valor de la celda (una fecha, un texto o null).
+         */
     @Override
     protected void setValue(Object valor) {
         if (valor instanceof Calendar c) {
             setText(fmt.format(c.getTime()));
         } else if (valor == null) {
-            setText("-");                                  // sin fecha de devolución
+            setText("-");                                  
         } else {
             super.setValue(valor);
         }
     }
 
-    // decide el color de fondo de la fila
+        /**
+         * Devuelve el componente que dibuja una celda, con el color de fondo según si el préstamo
+         * está vencido. Las filas seleccionadas conservan el color de selección.
+         * 
+         * @param t Tabla que se está dibujando.
+         * @param v Valor de la celda.
+         * @param seleccionada true si la fila está seleccionada.
+         * @param foco true si la celda tiene el foco.
+         * @param fila Número de fila, en la tabla visible.
+         * @param col Número de columna.
+         * @return Componente que dibuja la celda.
+         */
     @Override
     public Component getTableCellRendererComponent(JTable t, Object v,
             boolean seleccionada, boolean foco, int fila, int col) {
@@ -714,15 +937,82 @@ private class RenderPrestamos extends DefaultTableCellRenderer {
             boolean vencido = "Sí".equals(t.getValueAt(fila, 4));
             boolean pendiente = t.getValueAt(fila, 3) == null;
             if (vencido && pendiente) {
-                c.setBackground(new Color(0xFFC9C9));      // sin devolver y vencido: rojo claro
+                c.setBackground(new Color(0xFFC9C9));      
             } else if (vencido) {
-                c.setBackground(new Color(0xFFF0C9));      // devuelto fuera de término: amarillo claro
+                c.setBackground(new Color(0xFFF0C9));     
             } else {
                 c.setBackground(Color.WHITE);
             }
             c.setForeground(Color.BLACK);
         }
         return c;
+    }
+}
+
+    /**
+     * Obtiene el socio de la fila seleccionada en la tabla de socios, teniendo en cuenta que
+     * la tabla puede estar filtrada u ordenada. Si no hay ninguna fila seleccionada, avisa en pantalla.
+     * 
+     * @return El socio seleccionado, o null si no hay ninguna fila seleccionada.
+     */
+private Socio socioSeleccionado() {
+    int fila = tablaSocios.getSelectedRow();
+    if (fila < 0) {
+        JOptionPane.showMessageDialog(this, "Seleccioná un socio de la tabla.",
+                "Dato inválido", JOptionPane.WARNING_MESSAGE);
+        return null;
+    }
+    
+    return biblio.getSocios().get(tablaSocios.convertRowIndexToModel(fila));
+}
+
+    /**
+     * Suma días de préstamo al docente seleccionado en la tabla de socios. Solo se permite a los
+     * docentes responsables: avisa si el socio no es docente o no es responsable. Pide la cantidad
+     * de días a sumar, valida que sea un número entero mayor a cero y actualiza las tablas.
+     */
+private void ampliarDiasDocente() {
+    Socio s = socioSeleccionado();
+    if (s == null) return;
+
+    if (!(s instanceof Docente d)) {
+        JOptionPane.showMessageDialog(this,
+                "Solo se pueden ampliar los días de préstamo de los docentes.",
+                "Socio no válido", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    if (!d.esResponsable()) {
+        JOptionPane.showMessageDialog(this,
+                d.getNombre() + " no es responsable: tiene o tuvo préstamos vencidos.",
+                "No se pueden ampliar los días", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    String texto = JOptionPane.showInputDialog(this,
+            d.getNombre() + " tiene " + d.getDiasPrestamo() + " días de préstamo.\n"
+            + "¿Cuántos días querés sumar?",
+            "Ampliar días de préstamo", JOptionPane.QUESTION_MESSAGE);
+    if (texto == null) return;                        
+
+    try {
+        int dias = Integer.parseInt(texto.trim());
+        if (dias <= 0) {
+            JOptionPane.showMessageDialog(this, "Ingresá un número mayor a cero.",
+                    "Dato inválido", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (biblio.cambiarDiasDocente(d, dias)) {
+            refrescarSocios();
+            refrescarPrestamos();      
+            JOptionPane.showMessageDialog(this,
+                    "Ahora tiene " + d.getDiasPrestamo() + " días de préstamo.");
+        }
+    } catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(this, "Debe ingresar un número entero.",
+                "Dato inválido", JOptionPane.WARNING_MESSAGE);
+    } catch (SQLException ex) {
+        JOptionPane.showMessageDialog(this, "Error de base de datos: " + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
 }

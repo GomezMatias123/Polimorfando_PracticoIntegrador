@@ -90,14 +90,20 @@ public class Biblioteca {
     public ArrayList<Socio> getSocios() {
         return socios;
     }
-
+    /**
+     * Prepara la biblioteca al iniciar el programa: crea las tablas si no existen y
+     * carga en memoria los socios, los libros y los préstamos guardados en la base de datos
+     * Debe llamarse una sola vez, ya que agrega los datos a las listas existentes.
+     * 
+     * @throws SQLException si ocurre un error al acceder a la base de datos.
+     */
 
     public void cargarDesdeBD() throws SQLException {
     ConexionDB.crearTablas();
     this.getSocios().addAll(SocioDAO.cargarTodos());
     this.getLibros().addAll(LibroDAO.cargarTodos());
     PrestamoDAO.cargarTodos(this.getSocios(), this.getLibros());
-}
+    }
     /**
      * Devuelve una coleccion con los docentes responsables (aquellos que nunca
      * tuvieron ni tienen un prestamo vencido).
@@ -219,24 +225,63 @@ public class Biblioteca {
         return lista;
     }
 
+    /**
+     * Registra un nuevo libro: lo guarda en la base de datos y luego lo agrega
+     * a la lista de libros. Si el guardado falla, el libro no se agrega.
+     * 
+     * @param p_titulo Título del libro,
+     * @param p_edicion Número de edición del libro.
+     * @param p_editorial Editorial del libro.
+     * @param p_anio Año de publicación del libro.
+     * @throws SQLException si ya existe un libro con ese título o falla el acceso a la base de datos.
+     */
 public void nuevoLibro(String p_titulo, int p_edicion, String p_editorial, int p_anio) throws SQLException{
     Libro nuevoLibro = new Libro(p_titulo, p_edicion, p_editorial, p_anio);
     LibroDAO.insertar(nuevoLibro);
     this.getLibros().add(nuevoLibro);
 }
-
+    /**
+     * Registra un nuevo socio de tipo Estudiante: lo guarda en la base de datos
+     * y luego lo agrega a la lista de socios. Si el guardado falla, el socio no se agrega.
+     * 
+     * @param p_dniSocio D.N.I. del estudiante.
+     * @param p_nombre Nombre y apellido del estudiante.
+     * @param p_carrera Carrera que cursa el estudiante.
+     * @throws SQLException si ya existe un socio con ese D.N.I. o falla el acceso a la base de datos.
+     */
 public void nuevoSocioEstudiante(int p_dniSocio, String p_nombre, String p_carrera) throws SQLException{
     Socio nuevoSocio = new Estudiante(p_dniSocio, p_nombre, p_carrera);
     SocioDAO.insertar(nuevoSocio);
     this.getSocios().add(nuevoSocio);
 }
 
+    /**
+     * Registra un nuevo socio de tipo Docente: lo guarda en la base de datos
+     * y luego lo agrega a la lista de socios. Si el guardado falla, el socio no se agrega.
+     * 
+     * @param p_dniSocio D.N.I. del docente.
+     * @param p_nombre Nombre y apellido del docente.
+     * @param p_area Área o departamento al que pertenece el docente.
+     * @throws SQLException si ya existe un socio con ese D.N.I. o falla el acceso a la base de datos.
+     */
 public void nuevoSocioDocente(int p_dniSocio,String p_nombre, String p_area) throws SQLException{
     Socio nuevoSocio = new Docente(p_dniSocio, p_nombre, p_area);
     SocioDAO.insertar(nuevoSocio);
     this.getSocios().add(nuevoSocio);
 }
 
+    /**
+     * Registra el préstamo de un libro a un socio. Se concreta solo si el socio puede pedir
+     * (no tiene préstamos vencidos ni supera su límite) y si el libro no está prestado.
+     * Si se concreta, el préstamo se guarda en la base de datos y se agrega al historial
+     * del libro y del socio.
+     * 
+     * @param p_fechaRetiro Fecha en que el socio retira el libro.
+     * @param p_socio Socio que solicita el libro.
+     * @param p_libro Libro que se presta.
+     * @return true si el préstamo se realizó; false si el socio o el libro son null o si el socio no puede pedir o el libro ya se encuentra prestado.
+     * @throws SQLException si falla el guardado en la base de datos.
+     */
 public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro) throws SQLException{
     Prestamo nuevoPrestamo = null;
     Socio socioSolicitante = p_socio;
@@ -257,6 +302,15 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
         }
 }
 
+    /**
+     * Registra la devolución de un libro prestado: asienta la fecha de hoy como fecha
+     * de devolución de su último préstamo, tanto en la base de datos como en memoria.
+     * Si el libro es null, informa el error por consola y no hace nada.
+     * 
+     * @param pLibro Libro que se devuelve.
+     * @throws LibroNoPrestadoException si el libro no se encuentra prestado.
+     * @throws SQLException si falla el guardado en la base de datos.
+     */
     public void devolverLibro(Libro pLibro) throws SQLException{
     Libro libroDDevolucion = pLibro;
     
@@ -270,12 +324,19 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
     throw new LibroNoPrestadoException("El libro " + libroDDevolucion.toString() + " no se puede devolver ya que se encuentra en la biblioteca");
     }
 
+    
     Calendar fechaHoy = Calendar.getInstance();
     int cantPrestamos = libroDDevolucion.getPrestamos().size() - 1;
     PrestamoDAO.registrarDevolucion(libroDDevolucion.getTitulo(), fechaHoy); 
     libroDDevolucion.getPrestamos().get(cantPrestamos).registrarFechaDevolucion(fechaHoy);
     }
 
+    /**
+     * Cuenta los socios de un tipo determinado (por ejemplo "Estudiante" o "Docente"),
+     * 
+     * @param p_objeto Tipo de socio que se quiere contar.
+     * @return Cantidad de socios de ese tipo.
+     */
     public int cantidadDeSociosPorTipo(String p_objeto){
         int cant = 0;
         for(Socio s : this.getSocios()){
@@ -285,6 +346,13 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
         }
         return cant;
     }
+
+    /**
+     * Devuelve una colección con los préstamos que están vencidos y todavía no fueron
+     * devueltos, comparando contra la fecha actual.
+     * 
+     * @return ArrayList de Prestamo con los préstamos vencidos sin devolver.
+     */
 
     public ArrayList <Prestamo> prestamosVencidos(){
         ArrayList <Prestamo> auxListaPrestamos = new ArrayList<>();
@@ -297,5 +365,25 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
             }
         }
         return auxListaPrestamos;
+    }
+
+    /**
+     * Suma días de préstamo a un docente, solo si es responsable (nunca tuvo ni tiene un
+     * préstamo vencido). El nuevo total se guarda primero en la base de datos y luego
+     * se actualiza el docente en memoria.
+     * 
+     * @param p_docente Docente al que se le suman días.
+     * @param p_dias Cantidad de días a sumar (debe ser mayor a cero).
+     * @return true si se sumaron los días; false si el docente es null, p_dias no es positivo o el docente no es responsable.
+     * @throws SQLException si falla el guardado en la base de datos.
+     */
+    public boolean cambiarDiasDocente(Docente p_docente, int p_dias) throws SQLException {
+        if (p_docente == null || p_dias <= 0 || !p_docente.esResponsable()) {
+            return false;
+        }
+        int nuevoTotal = p_docente.getDiasPrestamo() + p_dias;
+        SocioDAO.actualizarDiasPrestamo(p_docente.getDNI(), nuevoTotal);   // primero la base
+        p_docente.cambiarDiasDePrestamo(p_dias);                            // después la memoria
+        return true;
     }
 }
