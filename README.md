@@ -63,16 +63,15 @@ La base de datos `biblioteca.db` se crea sola la primera vez que se ejecuta ya q
 
 1. Clonar el repositorio y abrir la carpeta en VS Code.
 2. Instalar la extensión **Extension Pack for Java**, **SQLite**, **SQLite Viewer**, **Code Runner**.
-3. Abrir una terminal en la carpeta del proyecto y compilar:
-4. Abrir Prefences: OPEN USER SETTINGS(JSON) y agregar al final:
+3. Abrir Prefences: OPEN USER SETTINGS(JSON) y agregar al final:
 
 "code-runner.executorMap": {`
        `"java": "cd $dir && javac -encoding UTF-8 -cp \".;lib/*\" *.java && java --enable-native-access=ALL-UNNAMED -cp \".;lib/*\" $fileNameWithoutExt"
     }
 
-5. Activar la opcion `code-runner.runInTermina` de la extension instalada antes mencionada.
+4. Activar la opcion `code-runner.runInTermina` de la extension instalada antes mencionada.
 
-Para la **Interfaz Grafica** ejecuntar `InterfarBiblioteca` y para la interfaz por consola ejecutar `GestionBibliotcea`.
+Para la **Interfaz Grafica** ejecutar `InterfarBiblioteca` y para la interfaz por consola ejecutar `GestionBibliotcea`.
 
 ### Con BlueJ
 
