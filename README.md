@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="img/Webp.net-resizeimage-1-300x300.png" alt="FaCENA - UNNE" width="420">
+  <img src="img/Webp.net-resizeimage-1-300x300.png" alt="FaCENA - UNNE" width="220">
 </p>
 
 # Gestión de Biblioteca
