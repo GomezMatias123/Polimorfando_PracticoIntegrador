@@ -169,6 +169,8 @@ public class GestionBiblioteca {
     }
 } catch (LibroNoPrestadoException e) {
     System.out.println(">> Error: " + e.getMessage());
+} catch (NumberFormatException e) {
+    System.out.println(">> Error: debe ingresar un número válido.");
 }
 
         } while (opcion != 0);
@@ -176,7 +178,14 @@ public class GestionBiblioteca {
         scanner.close();
     }
 
-
+    /**
+     * Busca un libro por su título dentro de la biblioteca, sin distinguir mayúsculas
+     * de minúsculas ni espacios al principio o al final.
+     * 
+     * @param biblio Biblioteca en la que se realiza la búsqueda.
+     * @param tituloDev Título del libro que se busca.
+     * @return El libro encontrado, o null si no existe ninguno con ese título.
+     */
     public static Libro buscarLibroPorTitulo(Biblioteca biblio, String tituloDev){
         for(Libro l : biblio.getLibros()){
             if (l.getTitulo().trim().equalsIgnoreCase(tituloDev.trim())) {

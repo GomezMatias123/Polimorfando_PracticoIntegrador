@@ -3,8 +3,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
+    /**
+     * Acceso a datos de la tabla prestamo: guarda préstamos nuevos, registra devoluciones
+     * y reconstruye los préstamos guardados enlazándolos con sus socios y libros.
+     */
 public class PrestamoDAO {
 
+    /**
+     * Guarda un préstamo nuevo en la base de datos, con su fecha de retiro, el D.N.I. del socio
+     * y el título del libro. Los préstamos nuevos se guardan sin fecha de devolución.
+     * 
+     * @param p Préstamo que se guarda.
+     * @throws SQLException si el socio o el libro no existen en la base, si el libro ya tiene un préstamo sin devolver, o si falla el acceso a la base de datos.
+     */
     public static void insertar(Prestamo p) throws SQLException {
         String sql = "INSERT INTO prestamo (fecha_retiro, dni_socio, titulo_libro) VALUES (?, ?, ?)";
         try (Connection con = ConexionDB.conectar();
@@ -16,6 +27,14 @@ public class PrestamoDAO {
         }
     }
 
+    /**
+     * Registra la fecha de devolución del préstamo abierto (sin devolver) de un libro.
+     * Si el libro no tiene un préstamo abierto, no modifica nada.
+     * 
+     * @param titulo Título del libro que se devuelve.
+     * @param fecha Fecha en que se devuelve el libro.
+     * @throws SQLException si falla el acceso a la base de datos.
+     */
     public static void registrarDevolucion(String titulo, Calendar fecha) throws SQLException {
         String sql = "UPDATE prestamo SET fecha_devolucion = ? "
                     + "WHERE titulo_libro = ? AND fecha_devolucion IS NULL";
@@ -27,7 +46,16 @@ public class PrestamoDAO {
         }
     }
 
-    // Reconstruye los préstamos y los engancha a los socios y libros ya cargados
+    /**
+     * Lee los préstamos guardados, en el orden en que se registraron, y los reconstruye
+     * agregándolos al historial del socio y del libro correspondientes.
+     * No valida reglas de préstamo ni usa la fecha actual: restaura el estado tal como
+     * fue guardado. Los socios y los libros deben estar cargados antes de llamar a este método.
+     * 
+     * @param socios Lista de socios ya cargados, donde se busca el socio de cada préstamo.
+     * @param libros Lista de libros ya cargados, donde se busca el libro de cada préstamo.
+     * @throws SQLException si falla el acceso a la base de datos.
+     */
     public static void cargarTodos(ArrayList<Socio> socios, ArrayList<Libro> libros) throws SQLException {
         HashMap<Integer, Socio> porDni = new HashMap<>();
         for (Socio s : socios) porDni.put(s.getDNI(), s);
