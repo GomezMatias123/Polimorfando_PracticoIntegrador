@@ -52,8 +52,12 @@ public class Prestamo {
 
         fechaVencimiento.add(Calendar.DAY_OF_MONTH, this.getSocio().getDiasPrestamo());
 
+        // se lleva al final del dia, asi devolver el mismo dia del vencimiento no cuenta como vencido
+        fechaVencimiento.set(Calendar.HOUR_OF_DAY, 23);
+        fechaVencimiento.set(Calendar.MINUTE, 59);
+        fechaVencimiento.set(Calendar.SECOND, 59);
+        fechaVencimiento.set(Calendar.MILLISECOND, 999);
 
-        
         return p_fecha.after(fechaVencimiento);
 
     }
