@@ -68,11 +68,25 @@ public abstract class Socio {
 
     public boolean puedePedir() {
 
-        Calendar fechaHoy = new GregorianCalendar();
+        return this.puedePedir(new GregorianCalendar());
+
+    }
+
+    /**
+     *
+     * igual que puedePedir(), pero controlando los prestamos a una fecha dada
+     * (por ejemplo la fecha de retiro del nuevo prestamo). Solo se revisan los
+     * prestamos que todavia no fueron devueltos.
+     *
+     * @param p_fecha fecha a la que se controlan los vencimientos
+     * @return retorna false si a esa fecha tiene algun libro sin devolver y vencido
+     */
+
+    public boolean puedePedir(Calendar p_fecha) {
 
         for(Prestamo p : this.getPrestamos()) {
 
-            if(p.vencido(fechaHoy) == true) {
+            if(p.getFechaDevolucion() == null && p.vencido(p_fecha)) {
 
                 return false;
 

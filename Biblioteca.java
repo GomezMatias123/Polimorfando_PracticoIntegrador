@@ -291,7 +291,7 @@ public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro
         System.err.println("Ocurrio un error: asignado al socio o al libro solicitado");
         return false;
     }
-        if(socioSolicitante.puedePedir() == true && libroDPrestamo.prestado()  == false){
+        if(socioSolicitante.puedePedir(p_fechaRetiro) == true && libroDPrestamo.prestado()  == false){
             nuevoPrestamo = new Prestamo(p_fechaRetiro, socioSolicitante, libroDPrestamo);
             PrestamoDAO.insertar(nuevoPrestamo);  
             libroDPrestamo.agregarPrestamo(nuevoPrestamo);
